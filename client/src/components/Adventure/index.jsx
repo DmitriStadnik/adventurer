@@ -1,88 +1,112 @@
-import React, { Component } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import { withRouter } from "react-router";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
-import colors from "../Reusable/colors";
+import {noise} from "../../utils/perlin";
 
 const Wrapper = styled.div`
-  width: 200px;
-  background-color: ${({bgColor}) => bgColor ? bgColor : 'auto'};
+  width: 100%;
+  height: 100%;
+  margin-top: 35px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   align-items: center;
-  height: 100%;
-  z-index: ${({visible}) => !visible ? '9998' : '10000'};
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-  transition: all 0.2s cubic-bezier(.25,.8,.25,1);
-  &:hover {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.25), 0 2px 3px rgba(0,0,0,0.22);
-  }
 `;
 
-const Logo = styled.div`
-  padding: 10px;
-  font-size: 20px;
-  color: white;
+const ArrRow = styled.div`
   width: 100%;
-  text-align: center;
+  height: 2px;
 `;
 
-const MobileMenuButton = styled.div`
-  position: fixed;
-  cursor: pointer;
-  top: 0px;
-  left: 0px;
-  z-index: ${({visible}) => !visible ? '9998' : '10000'};
-  background-color: ${({bgColor}) => bgColor ? bgColor : 'auto'};
-  height: 50px;
-  width: 50px;
-  display: none;
+const ArrCol = styled.span`
+  width: 2px;
+  height: 100%;
+  margin: 0;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
-  box-shadow: ${({visible}) => !visible ? '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)' : 'none'};
-  transition: all 0.2s cubic-bezier(.25,.8,.25,1);
-  &:hover {
-    box-shadow: ${({visible}) => !visible ? '0 2px 4px rgba(0,0,0,0.25), 0 2px 3px rgba(0,0,0,0.22)' : 'none'};
-  }
-  @media screen and (max-width: 768px) {
-    display: flex;
-  }
+  background: ${({color}) => color ? color : 'white'};
 `;
 
-const MobileMenuIcon = styled(FontAwesomeIcon)`
-  color: white;
-  font-size: 20px;
-`;
+const getColor = (value) => {
+  switch (true) {
+    case value < -4:
+      return '#1976D2';
+    case value < -3 && value >= -4:
+      return '#1E88E5';
+    case value < -2 && value >= -3:
+      return '#03A9F4';
+    case value < -1 && value >= -2:
+      return '#26C6DA';
+    case value < 0 && value >= -1:
+      return '#FFF176';
+    case value < 1 && value >= 0:
+      return '#D4E157';
+    case value < 2 && value >= 1:
+      return '#C0CA33';
+    case value < 3 && value >= 2:
+      return '#AFB42B';
+    case value < 4 && value >= 3:
+      return '#9E9D24';
+    case value < 5 && value >= 4:
+      return '#827717';
+    case value < 6 && value >= 5:
+      return '#795548';
+    case value >= 6:
+      return '#6D4C41';
+  }
+}
 
-class Adventure extends Component {
-  constructor(props) {
-    super(props);
+const getMiddlePoint = (min, max) => {
+  return (min + max) / 2;
+}
 
-    this.state = {
-      version: '0.01',
-      menuVisible: false,
+const convertValue = (value, min, max, minNext, maxNext) => {
+  const middlePoint = getMiddlePoint(min, max);
+  const middlePointNext = getMiddlePoint(minNext, maxNext);
+
+  const percentage = Math.abs(value) / max;
+
+  const dif = (percentage * (maxNext - middlePointNext));
+
+  if (value === middlePoint) {
+    return middlePointNext;
+  } else if (value > middlePoint) {
+    return middlePointNext + dif;
+  } else {
+    return middlePointNext - dif;
+  }
+}
+
+const generateNoiseArr = (width, height) => {
+  noise.seed(Math.random());
+  let arr = [];
+
+  for (let x = 0; x < height; x++) {
+    arr.push([]);
+    for (let y = 0; y < width; y++) {
+
+      let value = noise.simplex3(x / 35, y / 35, 50);
+
+      arr[x].push(convertValue(Number(value), -1, 1, -5, 6).toFixed(1));
     }
   }
 
-  render () {
-    const {
-      version, 
-      menuVisible
-    } = this.state;
+  return arr;
+}
 
-    return (
-      <>
-        <Wrapper bgColor={colors.green_main} visible={menuVisible}> 
-          <Logo>{`Adventurer v0.01`}</Logo>     
-        </Wrapper>
-        <MobileMenuButton bgColor={colors.green_main}visible={menuVisible}>
-          <MobileMenuIcon icon={faBars} />
-        </MobileMenuButton>
-      </>
-    )
-  }
+const Adventure = () => {
+  const [noiseArr] = useState(generateNoiseArr(400, 400));
+  return (
+    <Wrapper>
+      {noiseArr && noiseArr.map((row, i) => (
+        <ArrRow key={i}>
+          {row && row.map((item, j) => (
+            <ArrCol color={getColor(item)} key={i + '-' + j}>{''}</ArrCol>
+          ))}
+        </ArrRow>
+      ))}
+    </Wrapper>
+  )
 }
 
 export default withRouter(Adventure);

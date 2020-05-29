@@ -4,7 +4,7 @@ import Header from './components/Header';
 import Adventure from './components/Adventure';
 
 export default () => (
-  <> 
+  <>
     <Header />
     <Switch>
       <Route exact path="/" component={Adventure} />

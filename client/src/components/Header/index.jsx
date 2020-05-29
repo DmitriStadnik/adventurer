@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import { Link } from "react-router-dom";
 import { withRouter } from "react-router";
@@ -11,8 +11,11 @@ const Wrapper = styled.div`
   justify-content: flex-start;
   align-items: center;
   width: 100%;
+  height: 30px;
   position: fixed;
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  top: 0;
+  left: 0;
 `;
 
 const Logo = styled(Link)`
@@ -22,30 +25,17 @@ const Logo = styled(Link)`
   text-decoration: none;
   &:hover {
     text-decoration: none;
-    color: ${({hlColor}) => hlColor ? hlColor : 'gray'};
+    color: ${({hlcolor}) => hlcolor ? hlcolor : 'gray'};
   }
 `;
 
-class Header extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      version: '0.01',
-    }
-  }
-
-  render () {
-    const {
-      version, 
-    } = this.state;
-
-    return (
-      <Wrapper> 
-        <Logo сolor={colors.color_text} hlColor={colors.color_main_hl}>{`Adventurer v${version}`}</Logo>    
-      </Wrapper>
-    )
-  }
+const Header = () => {
+  const [version] = useState('0.01');
+  return (
+    <Wrapper>
+      <Logo сolor={colors.color_text} hlcolor={colors.color_main_hl} to={'/'}>{`Adventurer v${version}`}</Logo>
+    </Wrapper>
+  )
 }
 
 export default withRouter(Header);
