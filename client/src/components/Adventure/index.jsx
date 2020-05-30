@@ -1,7 +1,9 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import { withRouter } from "react-router";
 import {noise} from "../../utils/perlin";
+// import {PerlinNoise2} from "../../utils/perlin/perlin";
+import Perlin from "../../utils/perlin/perlin";
 
 const Wrapper = styled.div`
   width: 100%;
@@ -25,6 +27,21 @@ const ArrCol = styled.span`
   justify-content: center;
   align-items: center;
   background: ${({color}) => color ? color : 'white'};
+  &:hover {
+    opacity: 0.5;
+  }
+`;
+
+const CanvasWrapper = styled.div`
+  width: 100%;
+  height: 800px;
+  border: 5px solid black;
+  overflow: scroll;
+`;
+
+const Canvas = styled.canvas`
+  width: 3000px;
+  height: 3000px;
 `;
 
 const getColor = (value) => {
@@ -77,15 +94,15 @@ const convertValue = (value, min, max, minNext, maxNext) => {
   }
 }
 
-const generateNoiseArr = (width, height) => {
-  noise.seed(Math.random());
+const generateNoiseArr = (width, height, persistence, octaves) => {
   let arr = [];
+
+  const perlin = new Perlin(0);
 
   for (let x = 0; x < height; x++) {
     arr.push([]);
     for (let y = 0; y < width; y++) {
-
-      let value = noise.simplex3(x / 35, y / 35, 50);
+      let value = perlin.Noise2D(x / 45, y / 45, octaves, persistence);
 
       arr[x].push(convertValue(Number(value), -1, 1, -5, 6).toFixed(1));
     }
@@ -95,16 +112,30 @@ const generateNoiseArr = (width, height) => {
 }
 
 const Adventure = () => {
-  const [noiseArr] = useState(generateNoiseArr(400, 400));
+  const mainCanvas = React.createRef();
+  const [noiseArr] = useState(generateNoiseArr(500, 500, 0.75, 3));
+
+  console.log(noiseArr)
+
+  useEffect(() => {
+    const tileSize = 1;
+    const canvas = mainCanvas.current;
+    const ctx = canvas.getContext('2d');
+
+    noiseArr.map((row, i) => {
+      row.map((item, j) => {
+        ctx.fillStyle = getColor(item);
+        ctx.fillRect(tileSize * j, tileSize * i, tileSize, tileSize);
+      })
+    })
+
+
+  }, [noiseArr])
   return (
     <Wrapper>
-      {noiseArr && noiseArr.map((row, i) => (
-        <ArrRow key={i}>
-          {row && row.map((item, j) => (
-            <ArrCol color={getColor(item)} key={i + '-' + j}>{''}</ArrCol>
-          ))}
-        </ArrRow>
-      ))}
+      <CanvasWrapper>
+        <Canvas ref={mainCanvas} />
+      </CanvasWrapper>
     </Wrapper>
   )
 }
