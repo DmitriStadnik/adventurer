@@ -20,7 +20,7 @@ const ArrRow = styled.div`
 `;
 
 const ArrCol = styled.span`
-  width: 2px;
+  width: 3px;
   height: 100%;
   margin: 0;
   display: inline-flex;
@@ -34,14 +34,12 @@ const ArrCol = styled.span`
 
 const CanvasWrapper = styled.div`
   width: 100%;
-  height: 800px;
-  border: 5px solid black;
   overflow: scroll;
 `;
 
 const Canvas = styled.canvas`
-  width: 3000px;
-  height: 3000px;
+  width: 1000px;
+  height: 1000px;
 `;
 
 const getColor = (value) => {
@@ -104,7 +102,7 @@ const generateNoiseArr = (width, height, persistence, octaves) => {
     for (let y = 0; y < width; y++) {
       let value = perlin.Noise2D(x / 45, y / 45, octaves, persistence);
 
-      arr[x].push(convertValue(Number(value), -1, 1, -5, 6).toFixed(1));
+      arr[x].push(convertValue(Number(value), -1, 1, -1, 3).toFixed(1));
     }
   }
 
@@ -113,12 +111,12 @@ const generateNoiseArr = (width, height, persistence, octaves) => {
 
 const Adventure = () => {
   const mainCanvas = React.createRef();
-  const [noiseArr] = useState(generateNoiseArr(500, 500, 0.75, 3));
+  const [noiseArr] = useState(generateNoiseArr(500, 500, 0.34, 5));
 
   console.log(noiseArr)
 
   useEffect(() => {
-    const tileSize = 1;
+    const tileSize = 2;
     const canvas = mainCanvas.current;
     const ctx = canvas.getContext('2d');
 
